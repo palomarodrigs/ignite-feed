@@ -1,9 +1,10 @@
 import { Header } from './components/header'
+import { Sidebar } from './components/sidebar'
+import { Post } from './components/post'
 
 import styles from './App.module.css'
 
 import './global.css'
-import { Sidebar } from './components/sidebar'
 
 export function App() {
   return (
@@ -13,7 +14,9 @@ export function App() {
       <div className={styles.wrapper}>
         <Sidebar />
 
-        <main></main>
+        <main>
+          <Post />
+        </main>
       </div>
     </div>
   )
