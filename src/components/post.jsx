@@ -1,47 +1,82 @@
+/* eslint-disable react/prop-types */
+import { format, formatDistanceToNow } from 'date-fns'
+import ptBR from 'date-fns/locale/pt-BR'
+
 import { Avatar } from './avatar'
 import { Comment } from './comment'
 
 import styles from './post.module.css'
+import { useState } from 'react'
 
-export function Post() {
+export function Post({ author, content, publishedAt }) {
+  const [comments, setComments] = useState(['Very good, congratulations! 👏👏'])
+  const [newCommentText, setNewCommentText] = useState('')
+
+  const publishedDateFormatted = format(publishedAt, "d 'de' LLLL 'ás' HH:mm'h'", {
+    locale: ptBR,
+  })
+
+  const publishedDateRelativeToNow = formatDistanceToNow(publishedAt, {
+    locale: ptBR,
+    addSuffix: true,
+  })
+
+  function handleCreateNewComment(event) {
+    event.preventDefault()
+
+    setComments([...comments, newCommentText])
+    setNewCommentText('')
+  }
+
+  function handleChangeNewCommentChange(event) {
+    setNewCommentText(event.target.value)
+  }
+
   return (
     <article className={styles.post}>
       <header>
         <div className={styles.author}>
-          <Avatar src="https://github.com/palomarodrigs.png" />
+          <Avatar src={author.avatarUrl} />
 
           <div className={styles.authorInfo}>
-            <strong>Paloma Rodrigues</strong>
-            <span>Front-end Developer</span>
+            <strong>{author.name}</strong>
+            <span>{author.role}</span>
           </div>
         </div>
 
-        <time title="09 de Abril ás 20:00h" dateTime="2024-04-09 00:20:00">
-          Posted 1 hour ago
+        <time title={publishedDateFormatted} dateTime={publishedAt.toISOString()}>
+          {publishedDateRelativeToNow}
         </time>
       </header>
 
       <div className={styles.content}>
-        <p>Hi guys 👋</p>
-
-        <p>
-          I just uploaded a new project on my github. It’s a project I did with ai, The
-          project name is easyup 🚀
-        </p>
-
-        <p>
-          👉 <a href="">palomarodrigs/easyup</a>
-        </p>
-
-        <p>
-          <a href="">#newproject</a> <a href="">#ai</a>
-        </p>
+        {content.map((line) => {
+          if (line.type === 'paragraph') {
+            return <p key={line.content}>{line.content}</p>
+          } else if (line.type === 'link') {
+            return (
+              <p key={line.content}>
+                <a
+                  href="https://github.com/palomarodrigs/easyup-frontend"
+                  target="_blank"
+                >
+                  {line.content}
+                </a>
+              </p>
+            )
+          }
+        })}
       </div>
 
-      <form className={styles.commentForm}>
+      <form onSubmit={handleCreateNewComment} className={styles.commentForm}>
         <strong>Leave your feedback</strong>
 
-        <textarea placeholder="Leave a comment" />
+        <textarea
+          name="comment"
+          placeholder="Leave a comment"
+          value={newCommentText}
+          onChange={handleChangeNewCommentChange}
+        />
 
         <footer>
           <button type="submit">Post</button>
@@ -49,9 +84,9 @@ export function Post() {
       </form>
 
       <div className={styles.commentList}>
-        <Comment />
-        <Comment />
-        <Comment />
+        {comments.map((comment) => (
+          <Comment key={comment} content={comment} />
+        ))}
       </div>
     </article>
   )
